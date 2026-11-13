@@ -1,0 +1,6 @@
+node_modules/
+out/
+build/
+ios/
+.DS_Store
+auto-imports.d.ts

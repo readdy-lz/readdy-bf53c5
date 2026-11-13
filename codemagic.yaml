@@ -1,0 +1,34 @@
+workflows:
+  ios-simulator:
+    name: iOS Simulator
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      node: 22.22.0
+      xcode: latest
+    scripts:
+      - name: Install dependencies
+        script: npm ci
+      - name: Build web app
+        script: npm run build
+      - name: Generate iOS project and sync web assets
+        script: |
+          npx cap add ios
+          npx cap sync ios
+      - name: Build simulator app
+        script: |
+          xcodebuild build \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/ios \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Package simulator app
+        script: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            build/ios/Build/Products/Debug-iphonesimulator/App.app \
+            build/ios-simulator.zip
+    artifacts:
+      - build/ios-simulator.zip
